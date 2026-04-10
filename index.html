@@ -33,20 +33,37 @@
       font-weight: bold;
     }
 
+    /* 🔥 截圖區塊（包含標題 + grid） */
+    #capture {
+      display: inline-block;
+    }
+
+    /* 🔥 無縫 grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(5, 100px);
       grid-template-rows: repeat(5, 100px);
-      gap: 2px;
+      gap: 0;
       margin-top: 20px;
+      border: 1px solid #333;
     }
 
+    /* 🔥 單邊框避免變粗 */
     .cell {
-      border: 1px solid #333;
+      border-right: 1px solid #333;
+      border-bottom: 1px solid #333;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 5px;
+    }
+
+    .cell:nth-child(5n) {
+      border-right: none;
+    }
+
+    .cell:nth-last-child(-n + 5) {
+      border-bottom: none;
     }
 
     .star {
@@ -72,12 +89,16 @@
 <body>
 
 <div class="container">
-  <h1>
-    <input id="title" value="日音 BINGO">
-  </h1>
+  <!-- ✅ 這塊會被截圖 -->
+  <div id="capture">
+    <h1>
+      <input id="title" value="日音 BINGO">
+    </h1>
 
-  <div id="bingo" class="grid"></div>
+    <div id="bingo" class="grid"></div>
+  </div>
 
+  <!-- ❌ 不會進圖片 -->
   <button onclick="downloadImage()">下載圖片</button>
 </div>
 
@@ -100,7 +121,10 @@
   }
 
   function downloadImage() {
-    html2canvas(document.querySelector(".container")).then(canvas => {
+    html2canvas(document.querySelector("#capture"), {
+      scale: 2,
+      useCORS: true
+    }).then(canvas => {
       const link = document.createElement("a");
       link.download = "bingo.png";
       link.href = canvas.toDataURL();
