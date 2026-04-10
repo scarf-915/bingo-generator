@@ -4,20 +4,13 @@
   <meta charset="UTF-8" />
   <title>Bingo Generator</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
       background: #f5f5f5;
       padding: 20px;
-    }
-
-    input {
-      width: 90%;
-      border: none;
-      text-align: center;
-      font-size: 14px;
-      background: transparent;
     }
 
     .container {
@@ -31,14 +24,15 @@
     h1 input {
       font-size: 32px;
       font-weight: bold;
+      border: none;
+      text-align: center;
+      background: transparent;
     }
 
-    /* 🔥 截圖區塊（包含標題 + grid） */
     #capture {
       display: inline-block;
     }
 
-    /* 🔥 無縫 grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(5, 100px);
@@ -48,14 +42,12 @@
       border: 1px solid #333;
     }
 
-    /* 🔥 單邊框避免變粗 */
     .cell {
+      position: relative;
       border-right: 1px solid #333;
       border-bottom: 1px solid #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 5px;
+      padding: 4px;
+      overflow: hidden;
     }
 
     .cell:nth-child(5n) {
@@ -64,6 +56,34 @@
 
     .cell:nth-last-child(-n + 5) {
       border-bottom: none;
+    }
+
+    /* 🔥 顯示文字 */
+    .text {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.2;
+      font-size: 24px;
+    }
+
+    /* 🔥 編輯 input（透明覆蓋） */
+    .cell input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      text-align: center;
+      color: transparent;         /* 🔥 不顯示 input 字 */
+      caret-color: black;         /* 游標還在 */
+      font-size: 24px;
     }
 
     .star {
@@ -89,7 +109,6 @@
 <body>
 
 <div class="container">
-  <!-- ✅ 這塊會被截圖 -->
   <div id="capture">
     <h1>
       <input id="title" value="日音 BINGO">
@@ -98,7 +117,6 @@
     <div id="bingo" class="grid"></div>
   </div>
 
-  <!-- ❌ 不會進圖片 -->
   <button onclick="downloadImage()">下載圖片</button>
 </div>
 
@@ -106,18 +124,42 @@
   const grid = document.getElementById("bingo");
 
   for (let i = 0; i < 25; i++) {
-    const div = document.createElement("div");
-    div.className = "cell";
+    const cell = document.createElement("div");
+    cell.className = "cell";
 
     if (i === 12) {
-      div.innerHTML = "<div class='star'>★</div>";
+      cell.innerHTML = "<div class='star'>★</div>";
     } else {
+      const text = document.createElement("div");
+      text.className = "text";
+
       const input = document.createElement("input");
       input.placeholder = "輸入";
-      div.appendChild(input);
+
+      input.addEventListener("input", () => {
+        text.textContent = input.value;
+        autoResize(text);
+      });
+
+      cell.appendChild(text);
+      cell.appendChild(input);
     }
 
-    grid.appendChild(div);
+    grid.appendChild(cell);
+  }
+
+  // 🔥 自動縮字核心
+  function autoResize(el) {
+    let size = 24;
+    el.style.fontSize = size + "px";
+
+    while (
+      (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth)
+      && size > 10
+    ) {
+      size--;
+      el.style.fontSize = size + "px";
+    }
   }
 
   function downloadImage() {
