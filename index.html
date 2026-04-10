@@ -21,16 +21,23 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
 
-    h1 input {
-      font-size: 32px;
-      font-weight: bold;
-      border: none;
-      text-align: center;
-      background: transparent;
-    }
-
     #capture {
       display: inline-block;
+    }
+
+    /* 🔥 標題（顯示用） */
+    .title-text {
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    /* 🔥 標題 input（隱形編輯） */
+    #titleInput {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .grid {
@@ -46,8 +53,11 @@
       position: relative;
       border-right: 1px solid #333;
       border-bottom: 1px solid #333;
-      padding: 4px;
       overflow: hidden;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .cell:nth-child(5n) {
@@ -58,10 +68,10 @@
       border-bottom: none;
     }
 
-    /* 🔥 顯示文字 */
+    /* 🔥 文字 */
     .text {
-      width: 100%;
-      height: 100%;
+      width: 90%;
+      height: 90%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -72,7 +82,7 @@
       font-size: 24px;
     }
 
-    /* 🔥 編輯 input（透明覆蓋） */
+    /* 🔥 input（透明編輯層） */
     .cell input {
       position: absolute;
       inset: 0;
@@ -80,13 +90,19 @@
       height: 100%;
       border: none;
       background: transparent;
+      color: transparent;
+      caret-color: black;
       text-align: center;
-      color: transparent;         /* 🔥 不顯示 input 字 */
-      caret-color: black;         /* 游標還在 */
       font-size: 24px;
     }
 
+    /* ⭐ 完全置中 */
     .star {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 40px;
     }
 
@@ -109,10 +125,13 @@
 <body>
 
 <div class="container">
+
   <div id="capture">
-    <h1>
-      <input id="title" value="日音 BINGO">
-    </h1>
+    <!-- 🔥 顯示標題 -->
+    <div class="title-text" id="titleDisplay">日音 BINGO</div>
+
+    <!-- 🔥 隱形輸入 -->
+    <input id="titleInput" value="日音 BINGO">
 
     <div id="bingo" class="grid"></div>
   </div>
@@ -128,7 +147,10 @@
     cell.className = "cell";
 
     if (i === 12) {
-      cell.innerHTML = "<div class='star'>★</div>";
+      const star = document.createElement("div");
+      star.className = "star";
+      star.textContent = "★";
+      cell.appendChild(star);
     } else {
       const text = document.createElement("div");
       text.className = "text";
@@ -148,7 +170,7 @@
     grid.appendChild(cell);
   }
 
-  // 🔥 自動縮字核心
+  // 🔥 自動縮字
   function autoResize(el) {
     let size = 24;
     el.style.fontSize = size + "px";
@@ -161,6 +183,17 @@
       el.style.fontSize = size + "px";
     }
   }
+
+  // 🔥 標題同步（點擊修改）
+  const titleDisplay = document.getElementById("titleDisplay");
+  const titleInput = document.getElementById("titleInput");
+
+  titleDisplay.addEventListener("click", () => {
+    const text = prompt("輸入標題", titleDisplay.textContent);
+    if (text !== null) {
+      titleDisplay.textContent = text;
+    }
+  });
 
   function downloadImage() {
     html2canvas(document.querySelector("#capture"), {
